@@ -1,27 +1,27 @@
---アドオン名（大文字）
+--Addon name, UPPERCASE
 local addonName = "TEMPLATE";
 local addonNameLower = string.lower(addonName);
---作者名
+--Author
 local author = "AUTHOR";
 
---アドオン内で使用する領域を作成。以下、ファイル内のスコープではグローバル変数gでアクセス可
+--Create an area for use within the add-on. Below, in the scope in the file, it can be accessed with the global variable g
 _G["ADDONS"] = _G["ADDONS"] or {};
 _G["ADDONS"][author] = _G["ADDONS"][author] or {};
 _G["ADDONS"][author][addonName] = _G["ADDONS"][author][addonName] or {};
 local g = _G["ADDONS"][author][addonName];
 
---設定ファイル保存先
+--Configuration file save destination
 g.settingsFileLoc = string.format("../addons/%s/settings.json", addonNameLower);
 
---ライブラリ読み込み
+--load library
 local acutil = require('acutil');
 
---デフォルト設定
+--Default config
 if not g.loaded then
   g.settings = {
-    --有効/無効
+    --enable/disable
     enable = true,
-    --フレーム表示場所
+    --frame display location
     position = {
       x = 0,
       y = 0
@@ -29,7 +29,7 @@ if not g.loaded then
   };
 end
 
---lua読み込み時のメッセージ
+--Loading message for lua
 CHAT_SYSTEM(string.format("%s.lua is loaded", addonName));
 
 function TEMPLATE_SAVE_SETTINGS()
@@ -37,7 +37,7 @@ function TEMPLATE_SAVE_SETTINGS()
 end
 
 
---マップ読み込み時処理（1度だけ）
+--Processing when loading the map (only once)
 function TEMPLATE_ON_INIT(addon, frame)
   g.addon = addon;
   g.frame = frame;
@@ -47,47 +47,47 @@ function TEMPLATE_ON_INIT(addon, frame)
   if not g.loaded then
     local t, err = acutil.loadJSON(g.settingsFileLoc, g.settings);
     if err then
-      --設定ファイル読み込み失敗時処理
+      --Processing when reading the configuration file fails
       CHAT_SYSTEM(string.format("[%s] cannot load setting files", addonName));
     else
-      --設定ファイル読み込み成功時処理
+      --Processing when the configuration file is read successfully
       g.settings = t;
     end
     g.loaded = true;
   end
 
-  --設定ファイル保存処理
+  --Setting file save process
   TEMPLATE_SAVE_SETTINGS();
-  --メッセージ受信登録処理
-  --addon:RegisterMsg("メッセージ", "内部処理");
+  --Message reception registration process
+  --addon: RegisterMsg ("message", "internal processing");
 
-  --コンテキストメニュー
+  --Context menu
   frame:SetEventScript(ui.RBUTTONDOWN, "TEMPLATE_CONTEXT_MENU");
-  --ドラッグ
+  --drag
   frame:SetEventScript(ui.LBUTTONUP, "TEMPLATE_END_DRAG");
 
-  --フレーム初期化処理
+  --Frame initialization process
   TEMPLATE_INIT_FRAME(frame);
 
-  --再表示処理
+  --Redisplay process
   if g.settings.enable then
     frame:ShowWindow(1);
   else
     frame:ShowWindow(0);
   end
-  --Moveではうまくいかないので、OffSetを使用する…
+  --Move doesn't work, so use OffSet ...
   frame:Move(0, 0);
   frame:SetOffset(g.settings.position.x, g.settings.position.y);
 end
 
 function TEMPLATE_INIT_FRAME(frame)
-  --XMLに記載するとデザイン調整時にクライアント再起動が必要になるため、luaに書き込むことをオススメする
-  --フレーム初期化処理
+  --If you write it in XML, you need to restart the client when adjusting the design, so it is recommended to write it in lua.
+  --Frame initialization process
   local text = frame:CreateOrGetControl("richtext", "text", 0, 0, 0, 0);
   text:SetText(addonName);
 end
 
---コンテキストメニュー表示処理
+--Context menu display processing
 function TEMPLATE_CONTEXT_MENU(frame, msg, clickedGroupName, argNum)
   local context = ui.CreateContextMenu("TEMPLATE_RBTN", "Template", 0, 0, 300, 100);
   ui.AddContextMenuItem(context, "Hide", "TEMPLATE_TOGGLE_FRAME()");
@@ -95,14 +95,14 @@ function TEMPLATE_CONTEXT_MENU(frame, msg, clickedGroupName, argNum)
   ui.OpenContextMenu(context);
 end
 
---表示非表示切り替え処理
+--Show / hide switching process
 function TEMPLATE_TOGGLE_FRAME()
   if g.frame:IsVisible() == 0 then
-    --非表示->表示
+    --hide -> show
     g.frame:ShowWindow(1);
     g.settings.enable = true;
   else
-    --表示->非表示
+    --Show-> Hide
     g.frame:ShowWindow(0);
     g.settings.show = false;
   end
@@ -110,14 +110,14 @@ function TEMPLATE_TOGGLE_FRAME()
   TEMPLATE_SAVESETTINGS();
 end
 
---フレーム場所保存処理
+--Frame location save process
 function TEMPLATE_END_DRAG()
   g.settings.position.x = g.frame:GetX();
   g.settings.position.y = g.frame:GetY();
   TEMPLATE_SAVESETTINGS();
 end
 
---チャットコマンド処理（acutil使用時）
+--Chat command processing (when using acutil)
 function TEMPLATE_PROCESS_COMMAND(command)
   local cmd = "";
 
@@ -129,13 +129,13 @@ function TEMPLATE_PROCESS_COMMAND(command)
   end
 
   if cmd == "on" then
-    --有効
+    --valid
     g.settings.enable = true;
     CHAT_SYSTEM(string.format("[%s] is enable", addonName));
     TEMPLATE_SAVESETTINGS();
     return;
   elseif cmd == "off" then
-    --無効
+    --invalid
     g.settings.enable = false;
     CHAT_SYSTEM(string.format("[%s] is disable", addonName));
     TEMPLATE_SAVESETTINGS();
